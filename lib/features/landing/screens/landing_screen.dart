@@ -6,6 +6,10 @@ import 'package:whatsapp/features/auth/screens/login_screen.dart';
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
+  void navigateToLoginScreen(BuildContext context){
+    Navigator.pushNamed(context, LoginScreen.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -15,10 +19,10 @@ class LandingScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
-            Text(
+           const Text(
               'Welcome to whatsApp',
               style: TextStyle(fontSize: 33, fontWeight: FontWeight.w600),
             ),
@@ -48,8 +52,8 @@ class LandingScreen extends StatelessWidget {
             SizedBox(
               width: size.width*0.75,
                 child:CustomButton(text: 'AGREE TO CONTINUE', onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder:(ctx)=>LoginScreen()));
-                })),
+                  navigateToLoginScreen(context);
+                },),),
           ],
         ),
       ),
