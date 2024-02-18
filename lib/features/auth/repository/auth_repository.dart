@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:whatsapp/common/reposiltries/common_firebase_storage_repository.dart';
 import 'package:whatsapp/common/utils/utils.dart';
 import 'package:whatsapp/features/auth/screens/otp_screen.dart';
 import 'package:whatsapp/features/auth/screens/user_information.dart';
+import 'package:whatsapp/models/user_model.dart';
+import 'package:whatsapp/screens/mobile_layout_screen.dart';
 
 final authRepositoryProvider = Provider((ref) {
   return AuthRepository(
@@ -50,6 +55,42 @@ class AuthRepository {
       Navigator.pushNamedAndRemoveUntil(
           context, UserInformation.routeName, (route) => false);
     } on FirebaseAuthException catch (e) {
+      showSnackBar(context: context, content: e.toString());
+    }
+  }
+
+  void saveInformationToFirestore({
+    required String name,
+    required File? profileImage,
+    required ProviderRef ref,
+    required BuildContext context,
+  }) async {
+    try {
+      String uid = auth.currentUser!.uid;
+      String photoUrl =
+          'https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small/default-avatar-profile-icon-of-social-media-user-vector.jpg';
+
+      if (profileImage != null) {
+        photoUrl = await ref
+            .read(commonFirebaseStorageRepositoryProvider)
+            .storeFileToFirebase('profileImage/$uid', profileImage);
+      }
+
+      var user = UserModel(
+          name: name,
+          uid: uid,
+          profileImage: photoUrl,
+          isOnline: true,
+          phoneNumber: auth.currentUser!.uid,
+          groupId: []);
+
+      await firestore.collection('users').doc(uid).set(user.toMap());
+
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (ctx) => const MobileLayoutScreen()),
+          (route) => false);
+    } catch (e) {
       showSnackBar(context: context, content: e.toString());
     }
   }
